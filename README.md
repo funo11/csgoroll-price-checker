@@ -12,3 +12,4 @@ Free all browser extensions for CS2 skin traders on CSGORoll.
 2. Extract the ZIP
 3. Go to chrome://extensions → Enable Developer mode
 4. Click Load unpacked → select the skinhelper-build folder
+5. Extract the folder -> csgoroll-price-checker-main ->inside that folder you will see "skinhelper-extension", click it ->install the "skin build" whole file in your extension itself
