@@ -1,2 +1,14 @@
 # csgoroll-price-checker
-This is an extension for CSGOROLL for price checking your skins if they are over priced or underprice. This is based on 0.66 as per roll price for skins
+Free all browser extensions for CS2 skin traders on CSGORoll.
+
+✅ Check if skins are overpriced or underpriced vs Buff163
+✅ Portfolio tracker with live P&L
+✅ Quick compare multiple skins at once
+✅ Buff prices auto-fetched and updated every 60 seconds
+✅ Works on Chrome, Brave, Edge, Firefox
+
+**How to install:**
+1. Click Code → Download ZIP
+2. Extract the ZIP
+3. Go to chrome://extensions → Enable Developer mode
+4. Click Load unpacked → select the skinhelper-build folder
