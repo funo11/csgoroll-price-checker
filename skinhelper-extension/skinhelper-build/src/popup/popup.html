@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>CSGORoll Price Checker</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{width:380px;height:580px;overflow:hidden;font-family:'Segoe UI',sans-serif;background:#0f1117;color:#e0e0e0}
+
+    .header{background:linear-gradient(135deg,#1a1f2e,#222940);padding:10px 14px;border-bottom:2px solid #f4a40b;display:flex;align-items:center;gap:8px}
+    .header h1{font-size:12px;font-weight:700;color:#f4a40b;flex:1;letter-spacing:.3px}
+    .lang-select{background:#1a1f2e;border:1px solid #2a3148;border-radius:5px;color:#aaa;font-size:10px;padding:3px 5px;outline:none;cursor:pointer;max-width:110px}
+
+    .tabs{display:flex;background:#111622;border-bottom:1px solid #1e2433}
+    .tab{flex:1;padding:8px 4px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;color:#555;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
+    .tab:hover{color:#aaa}
+    .tab.active{color:#f4a40b;border-bottom-color:#f4a40b}
+
+    .panel{display:none;padding:12px 14px;height:calc(580px - 105px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2a3148 #0f1117}
+    .panel.active{display:block}.panel::-webkit-scrollbar{width:4px}.panel::-webkit-scrollbar-thumb{background:#2a3148;border-radius:3px}
+
+    .info-note{font-size:10px;color:#aaa;padding:6px 14px;border-bottom:1px solid #1e2433}
+
+    input[type=text],input[type=number],textarea,select{background:#1a1f2e;border:1px solid #2a3148;border-radius:5px;color:#e0e0e0;padding:6px 9px;font-size:12px;outline:none;transition:border-color .2s;width:100%}
+    input:focus,textarea:focus{border-color:#f4a40b}
+    input.found{border-color:#4caf81}
+    textarea{resize:vertical;min-height:70px;font-family:'Segoe UI',sans-serif}
+
+    .field-label{font-size:10px;color:#555;margin-bottom:3px}
+    .section-title{font-size:10px;font-weight:600;color:#f4a40b;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+
+    .btn{background:#f4a40b;color:#0f1117;border:none;border-radius:5px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;width:100%;margin-bottom:8px}
+    .btn:hover{background:#ffbb33}
+    .btn-sm{background:#1e2433;color:#ccc;border:1px solid #2a3148;border-radius:5px;padding:5px 9px;font-size:11px;cursor:pointer}
+    .btn-sm:hover{background:#2a3148}
+    .btn-del{background:transparent;color:#e05555;border:1px solid #e05555;border-radius:4px;padding:3px 7px;font-size:11px;cursor:pointer}
+
+    .name-wrap{position:relative;margin-bottom:6px}
+    .name-wrap input{padding-right:28px}
+    .name-status{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none}
+    .suggestions{position:absolute;left:0;right:0;top:calc(100% + 2px);background:#1a1f2e;border:1px solid #2a3148;border-radius:5px;z-index:999;max-height:200px;overflow-y:auto;display:none}
+    .suggestions.open{display:block}
+    .sugg-item{padding:6px 10px;font-size:11px;color:#ccc;cursor:pointer;border-bottom:1px solid #1e2433}
+    .sugg-item:hover{background:#222940;color:#f4a40b}
+
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+    .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
+
+    .preview{background:#1a1f2e;border:1px solid #2a3148;border-radius:6px;padding:8px 10px;margin-bottom:8px;display:none}
+    .preview.visible{display:block}
+    .preview-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+    .preview-label{font-size:10px;color:#555}
+    .preview-val{font-size:12px;font-weight:700}
+    .preview-divider{border:none;border-top:1px solid #2a3148;margin:6px 0}
+    .verdict{font-size:13px;font-weight:700;text-align:center;padding:4px 0 2px}
+    .verdict.over{color:#e05555}
+    .verdict.under{color:#4caf81}
+    .verdict.fair{color:#888}
+
+    .breakeven{background:#1a1f2e;border:1px solid #2a3148;border-radius:6px;padding:8px 10px;margin-bottom:8px;display:none;font-size:11px}
+    .breakeven.visible{display:block}
+    .breakeven-val{color:#f4a40b;font-weight:700}
+
+    .tool-row{display:flex;gap:6px;align-items:center}
+    input[type=file]{display:none}
+    .label-btn{background:#1e2433;color:#ccc;border:1px solid #2a3148;border-radius:5px;padding:5px 9px;font-size:11px;cursor:pointer}
+    .label-btn:hover{background:#2a3148}
+
+    .skin-list{max-height:none;display:flex;flex-direction:column;gap:4px}
+    .skin-item{background:#1a1f2e;border:1px solid #2a3148;border-radius:6px;padding:6px 8px;display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:6px}
+    .skin-name{font-size:11px;color:#bbb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+    .tag{font-size:10px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap}
+    .tag-buff{color:#4caf81;background:#1e3328}
+    .tag-correct{color:#6ab4f0;background:#1a2a38}
+    .tag-over{color:#e05555;background:#3a1e1e}
+    .tag-under{color:#4caf81;background:#1e3328}
+    .tag-fair{color:#888;background:#1e2030}
+    .tag-own{color:#f4a40b;background:#2a2010}
+
+    .portfolio-list{max-height:none;display:flex;flex-direction:column;gap:4px}
+    .portfolio-item{background:#1a1f2e;border:1px solid #2a3148;border-radius:6px;padding:7px 8px}
+    .pi-top{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+    .pi-name{font-size:11px;color:#ccc;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pi-bottom{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .pi-stat{font-size:10px;color:#666}
+    .pi-stat span{font-weight:700}
+    .pi-profit{font-size:10px;font-weight:700}
+    .pi-profit.pos{color:#4caf81}
+    .pi-profit.neg{color:#e05555}
+
+    .port-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
+    .port-card{background:#1a1f2e;border:1px solid #2a3148;border-radius:6px;padding:7px 8px;text-align:center}
+    .port-card-label{font-size:9px;color:#555;margin-bottom:3px;text-transform:uppercase}
+    .port-card-val{font-size:13px;font-weight:700}
+
+    .compare-results{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+    .compare-item{background:#1a1f2e;border:1px solid #2a3148;border-radius:5px;padding:6px 8px;display:flex;align-items:center;gap:6px;font-size:11px}
+    .ci-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ccc}
+    .ci-notfound{color:#555;font-style:italic}
+
+    .status{font-size:10px;margin-top:5px;min-height:14px}
+    .empty{text-align:center;color:#444;font-size:11px;padding:16px 0}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>CSGORoll Price Checker</h1>
+  <select class="lang-select" id="langSelect"></select>
+</div>
+
+<div class="info-note" id="infoNote"></div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="check">🔍 Check</div>
+  <div class="tab" data-tab="portfolio">📊 Portfolio</div>
+  <div class="tab" data-tab="compare">⚡ Compare</div>
+</div>
+
+<!-- CHECK TAB -->
+<div class="panel active" id="tab-check">
+  <div class="field-label" id="labelSkinName"></div>
+  <div class="name-wrap">
+    <input type="text" id="skinName" autocomplete="off"/>
+    <span class="name-status" id="nameStatus"></span>
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="field-label" id="labelRollCoins"></div>
+      <input type="number" id="rollCoins" step="0.01"/>
+    </div>
+    <div>
+      <div class="field-label" id="labelBuffUSD"></div>
+      <input type="number" id="buffUSD" step="0.01"/>
+    </div>
+  </div>
+  <div class="preview" id="preview">
+    <div class="preview-row">
+      <span class="preview-label" id="labelPreviewBuff"></span>
+      <span class="preview-val" id="prev-buff" style="color:#4caf81"></span>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label" id="labelPreviewCorrect"></span>
+      <span class="preview-val" id="prev-correct" style="color:#6ab4f0"></span>
+    </div>
+    <div class="preview-row">
+      <span class="preview-label" id="labelPreviewPaying"></span>
+      <span class="preview-val" id="prev-roll" style="color:#ccc"></span>
+    </div>
+    <hr class="preview-divider"/>
+    <div class="verdict" id="prev-verdict"></div>
+  </div>
+  <div class="breakeven" id="breakeven">
+    <span id="breakeven-text"></span>
+  </div>
+  <button class="btn" id="addSkin"></button>
+  <div class="tool-row">
+    <label class="label-btn" for="csvImport" id="labelCSV"></label>
+    <input type="file" id="csvImport" accept=".csv"/>
+    <button class="btn-sm" id="exportBtn"></button>
+    <button class="btn-del" id="clearAll"></button>
+  </div>
+  <div class="status" id="skinStatus"></div>
+  <div style="margin-top:10px">
+    <div class="section-title" id="titleSavedSkins"></div>
+    <div class="skin-list" id="skinList">
+      <div class="empty" id="emptySkins"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PORTFOLIO TAB -->
+<div class="panel" id="tab-portfolio">
+  <div class="section-title">Add Owned Skin</div>
+  <div class="field-label">Skin Name</div>
+  <div class="name-wrap">
+    <input type="text" id="portSkinName" autocomplete="off"/>
+    <span class="name-status" id="portNameStatus"></span>
+    <div class="suggestions" id="portSuggestions"></div>
+  </div>
+  <div class="three-col">
+    <div>
+      <div class="field-label">Paid (coins)</div>
+      <input type="number" id="portPaid" step="0.01" placeholder="e.g. 1500"/>
+    </div>
+    <div>
+      <div class="field-label">Qty</div>
+      <input type="number" id="portQty" step="1" value="1" min="1"/>
+    </div>
+    <div>
+      <div class="field-label">Buff $ (auto)</div>
+      <input type="number" id="portBuffUSD" step="0.01" placeholder="auto"/>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;margin-bottom:8px">
+    <button class="btn" id="portAddBtn" style="margin-bottom:0">+ Add to Portfolio</button>
+    <button class="btn-del" id="portClearAll">Clear All</button>
+  </div>
+  <div class="port-summary" id="portSummary" style="display:none">
+    <div class="port-card">
+      <div class="port-card-label">Invested</div>
+      <div class="port-card-val" id="portTotalInvested" style="color:#6ab4f0"></div>
+    </div>
+    <div class="port-card">
+      <div class="port-card-label">Buff Value</div>
+      <div class="port-card-val" id="portTotalValue" style="color:#4caf81"></div>
+    </div>
+    <div class="port-card">
+      <div class="port-card-label">P&L</div>
+      <div class="port-card-val" id="portPnL"></div>
+    </div>
+  </div>
+  <div class="portfolio-list" id="portfolioList">
+    <div class="empty">No skins in portfolio yet.</div>
+  </div>
+  <div class="status" id="portStatus"></div>
+</div>
+
+<!-- COMPARE TAB -->
+<div class="panel" id="tab-compare">
+  <div class="section-title">Quick Compare</div>
+  <div class="field-label">Paste skin names + Roll coin price (one per line)</div>
+  <textarea id="compareInput" placeholder="AK-47 | Redline FT, 1200&#10;M4A4 | Howl FN, 85000&#10;Karambit | Fade FN, 15000"></textarea>
+  <div style="margin-top:8px;display:flex;gap:6px">
+    <button class="btn" id="compareBtn" style="margin-bottom:0">Analyse All</button>
+    <button class="btn-sm" id="compareClear">Clear</button>
+  </div>
+  <div class="compare-results" id="compareResults"></div>
+</div>
+
+<script src="../browser-polyfill.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

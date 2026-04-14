@@ -1,0 +1,54 @@
+{
+  "name": "CSGORoll Price Checker",
+  "description": "Real-time Buff163 price checker for CS2 skin trading on CSGORoll",
+  "version": "1.0",
+  "manifest_version": 3,
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png",
+    "32": "assets/icon32.png"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.csgoroll.com/*",
+        "https://www.csgoroll.gg/*",
+        "https://www.csgorolltr.com/*"
+      ],
+      "js": [
+        "src/browser-polyfill.js",
+        "src/content/content.js"
+      ],
+      "css": [
+        "src/content/content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png"
+    }
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.csgoroll.com/*",
+    "https://www.csgoroll.gg/*",
+    "https://www.csgorolltr.com/*",
+    "https://prices.csgotrader.app/*",
+    "https://translate.googleapis.com/*"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "skinhelper@csgoroll",
+      "strict_min_version": "109.0"
+    }
+  }
+}
