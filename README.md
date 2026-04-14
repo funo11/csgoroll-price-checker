@@ -1,4 +1,4 @@
-# csgoroll-price-checker
+# CSGORoll price checker
 Free all browser extensions for CS2 skin traders on CSGORoll.
 
 ✅ Check if skins are overpriced or underpriced vs Buff163
